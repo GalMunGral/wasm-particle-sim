@@ -59,7 +59,7 @@ const RESET_DELAY_MS: i32 = 5000;
 pub async fn start() -> Result<(), JsValue> {
     set_panic_hook();
 
-    let camera = Camera::new(2.0 * BOX_SIZE, -2.0 * BOX_SIZE, BOX_SIZE);
+    let camera = Camera::new(1.5 * BOX_SIZE, -1.5 * BOX_SIZE, 0.75 * BOX_SIZE);
 
     let proj_mat = Rc::new(RefCell::new(Matrix4::<f32>::zeros()));
 
@@ -118,11 +118,14 @@ fn draw(
         .query_selector("#fps")
         .unwrap()
         .unwrap()
-        .set_text_content(Some(&format!("FPS: {:.2}", simulation.borrow().fps())));
+        .set_text_content(Some(&{
+    let fps = simulation.borrow().fps();
+    if fps.is_finite() { format!("{:.0} fps", fps) } else { String::new() }
+}));
 
     simulation.borrow_mut().advance(timestamp);
 
-    gl.clear_color(0.4, 0.4, 0.4, 1.0);
+    gl.clear_color(0.05, 0.05, 0.08, 1.0);
     gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT | WebGl2RenderingContext::DEPTH_BUFFER_BIT);
     gl.use_program(Some(program));
     gl.bind_vertex_array(Some(vao));
@@ -198,7 +201,7 @@ fn reset_aspect_ratio(
 
     *proj_mat.borrow_mut() = Matrix4::new_perspective(
         canvas.width() as f32 / canvas.height() as f32,
-        PI / 4.0,
+        PI / 3.0,
         NEAR_PLANE,
         FAR_PLANE,
     );
@@ -235,8 +238,8 @@ fn setup_event_listeners(
 
     let count = document().query_selector("#count")?.ok_or("#count")?;
     let control = document()
-        .query_selector("#control input")?
-        .ok_or("#control input")?
+        .query_selector("#particle-count")?
+        .ok_or("#particle-count")?
         .dyn_into::<HtmlInputElement>()?;
     count.set_text_content(Some(&format!("number of particles: {}", control.value())));
 
@@ -252,6 +255,18 @@ fn setup_event_listeners(
     });
     control.add_event_listener_with_callback("input", reset_cb.as_ref().unchecked_ref())?;
     reset_cb.forget();
+
+    let toggle = document()
+        .query_selector("#use-grid")?
+        .ok_or("#use-grid")?
+        .dyn_into::<HtmlInputElement>()?;
+    let simulation_2 = Rc::clone(simulation);
+    let toggle_1 = toggle.clone();
+    let toggle_cb = Closure::<dyn FnMut()>::new(move || {
+        simulation_2.borrow_mut().use_grid = toggle_1.checked();
+    });
+    toggle.add_event_listener_with_callback("change", toggle_cb.as_ref().unchecked_ref())?;
+    toggle_cb.forget();
 
     Ok(())
 }

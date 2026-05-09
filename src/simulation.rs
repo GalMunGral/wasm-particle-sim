@@ -9,6 +9,22 @@ extern "C" {
     fn log(s: &str);
 }
 
+fn hsl_to_rgb(h: f32, s: f32, l: f32) -> Vector3<f32> {
+    let c = (1.0 - (2.0 * l - 1.0).abs()) * s;
+    let h6 = h * 6.0;
+    let x = c * (1.0 - (h6 % 2.0 - 1.0).abs());
+    let (r, g, b) = match h6 as u32 {
+        0 => (c, x, 0.0),
+        1 => (x, c, 0.0),
+        2 => (0.0, c, x),
+        3 => (0.0, x, c),
+        4 => (x, 0.0, c),
+        _ => (c, 0.0, x),
+    };
+    let m = l - c / 2.0;
+    Vector3::new(r + m, g + m, b + m)
+}
+
 use crate::utils::{
     math::{clamp, rand_range},
     web::random_f32,
@@ -22,32 +38,22 @@ const C_AIR: f32 = 0.05;
 
 pub struct Clock {
     prev_time: f32,
-    total_time: f32,
-    total_frames: u32,
+    pub last_dt: f32,
 }
 
 impl Clock {
     pub fn new() -> Clock {
-        Clock {
-            prev_time: 0.0,
-            total_time: 0.0,
-            total_frames: 0,
-        }
+        Clock { prev_time: 0.0, last_dt: 0.0 }
     }
     pub fn reset(&mut self) {
         self.prev_time = 0.0;
-        self.total_time = 0.0;
-        self.total_frames = 0;
+        self.last_dt = 0.0;
     }
     pub fn advance(&mut self, time: f32) -> f32 {
-        let mut dt = 0.0;
-        if self.prev_time > 0.0 {
-            dt = time - self.prev_time;
-            self.total_frames += 1;
-        }
-        self.total_time += dt;
+        let dt = if self.prev_time > 0.0 { time - self.prev_time } else { 0.0 };
+        self.last_dt = dt;
         self.prev_time = time;
-        return dt;
+        dt
     }
 }
 
@@ -76,7 +82,7 @@ impl Particle {
                     .normalize(),
             mass: radius.powi(3),
             radius,
-            color: Vector3::new(random_f32(), random_f32(), random_f32()),
+            color: hsl_to_rgb(random_f32(), 0.75, 0.65),
         }
     }
 }
@@ -108,6 +114,7 @@ fn collide(p1: &RefCell<Particle>, p2: &RefCell<Particle>) {
 pub struct Simulation {
     pub particles: Vec<RefCell<Particle>>,
     pub particle_count: u32,
+    pub use_grid: bool,
     min_radius: f32,
     max_radius: f32,
     clock: Clock,
@@ -117,6 +124,7 @@ impl Simulation {
     pub fn new() -> Simulation {
         Simulation {
             particle_count: 0,
+            use_grid: true,
             min_radius: 0.0,
             max_radius: 0.0,
             clock: Clock::new(),
@@ -124,12 +132,7 @@ impl Simulation {
         }
     }
     pub fn fps(&self) -> f32 {
-        let fps = self.clock.total_frames as f32 / self.clock.total_time;
-        if fps.is_nan() {
-            60.0
-        } else {
-            fps
-        }
+        1.0 / self.clock.last_dt
     }
 
     pub fn repeat(&mut self) {
@@ -175,13 +178,14 @@ impl Simulation {
             }
         }
 
-        // for p1 in self.particles.iter() {
-        //     for p2 in self.particles.iter() {
-        //         collide(&p1, &p2);
-        //     }
-        // }
-
-        // grid optimization
+        if !self.use_grid {
+            for p1 in self.particles.iter() {
+                for p2 in self.particles.iter() {
+                    collide(p1, p2);
+                }
+            }
+            return;
+        }
 
         let grid_size = 2.0 * self.max_radius;
         let dim = f32::floor(BOX_SIZE / grid_size) as usize + 1;

@@ -36,7 +36,7 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
-        min-width: 220px;
+        width: 220px;
       }
 
       #control input[type="range"] {
@@ -45,24 +45,45 @@
         cursor: pointer;
       }
 
-      #stats {
-        display: flex;
-        justify-content: space-between;
+      #count {
         font-size: 12px;
         color: #aaa;
         letter-spacing: 0.02em;
+      }
+
+      #grid-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #aaa;
+        cursor: pointer;
+        accent-color: #60a5fa;
+      }
+
+      #fps {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        font-size: 28px;
+        font-weight: 600;
+        color: #60a5fa;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.02em;
       }
     </style>
   </head>
 
   <body>
     <canvas id="display"></canvas>
+    <div id="fps"></div>
     <div id="control">
-      <input type="range" value="50" min="50" max="40000" step="1" />
-      <div id="stats">
-        <span id="count"></span>
-        <span id="fps"></span>
-      </div>
+      <input id="particle-count" type="range" value="50" min="50" max="40000" step="1" />
+      <span id="count"></span>
+      <label id="grid-toggle">
+        <input id="use-grid" type="checkbox" checked />
+        spatial grid
+      </label>
     </div>
     <script type="module">
       import wasm from "./particle_simulation.js";
