@@ -25,16 +25,24 @@ and $`O(N)`$ directly. A toggle switches between the two collision detection cod
 paths. The brute-force implementation remains in `simulation.rs` for direct
 comparison.
 
-## Technical Implementation
+## Technical Challenges
 
-### 1. Uniform spatial grid
+### 1. Collision detection
 
-At each timestep, particles are binned into a 3D grid where each cell has side
-length $`2 \times r_{\max}`$. To find collision candidates for a given particle,
-only the $`3 \times 3 \times 3 = 27`$ neighboring cells need to be examined.
-With particles distributed uniformly, each cell holds $`O(1)`$ particles on
-average, so the total work across all $`N`$ particles is $`O(N)`$ rather than
-$`O(N^2)`$. The grid is rebuilt each frame as particles move.
+The naive approach checks every pair of particles, giving $`O(N^2)`$ work per
+frame. Two approaches are possible:
+
+| | Brute force | Uniform spatial grid |
+|---|---|---|
+| **Complexity** | $`O(N^2)`$ | $`O(N)`$ |
+| **Memory** | None | $`O(N)`$ grid rebuilt each frame |
+| **Implementation** | Two nested loops | Bin particles by position, check 27 neighbors |
+| **Correctness** | Exact | Exact — no false negatives, cell size guarantees all candidates are in adjacent cells |
+
+The grid cell size is set to $`2 \times r_{\max}`$, so any two overlapping
+particles are guaranteed to be in the same or adjacent cells. Each particle
+checks at most $`3^3 = 27`$ cells; with uniform distribution each cell holds
+$`O(1)`$ particles on average, giving $`O(N)`$ total.
 
 ### 2. Architecture
 
