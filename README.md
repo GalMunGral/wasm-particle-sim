@@ -6,18 +6,18 @@
 
 ### Purpose
 
-This project demonstrates two points. Most interactive programs are I/O bound —
-they spend their time waiting on user input or network responses, so algorithmic
-complexity rarely surfaces. A real-time simulation is compute bound, which makes
-it one of the few contexts where data structure choice is immediately visible.
-The naive $`O(N^2)`$ collision check and the $`O(N)`$ spatial grid produce
-observably different frame rates at realistic particle counts.
+Most interactive programs process a fixed, small amount of data per user action,
+so algorithmic complexity and execution model rarely matter — the input is
+bounded regardless of $`N`$. A real-time particle simulation is one of the few
+contexts where $`N`$ is something you can actually turn up, and both factors
+become visible at once.
 
-Execution model also matters at scale. JavaScript's JIT compiler must guard
-against type changes at runtime and can deoptimize; WASM's static types are
-resolved at compile time, producing tight machine code without runtime checks.
-On top of that, GC pauses in JavaScript are unpredictable in a way that is
-particularly disruptive for a simulation that needs to hit 60fps consistently.
+Data structure: the naive $`O(N^2)`$ collision check and the $`O(N)`$ spatial
+grid produce observably different frame rates once $`N`$ is large enough.
+
+Execution model: at that scale, JavaScript's runtime type guards and GC pauses
+become a bottleneck too — which is why this project uses WASM for the simulation
+and WebGL for rendering rather than staying in JavaScript.
 
 ### Strategy
 
