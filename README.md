@@ -6,10 +6,12 @@
 
 ### Purpose
 
-This project demonstrates two points. Data structure choice is what makes a
-simulation interactive or not — the naive $`O(N^2)`$ collision check and the
-$`O(N)`$ spatial grid are not just asymptotically different, they produce
-different outcomes at realistic particle counts.
+This project demonstrates two points. Most interactive programs are I/O bound —
+they spend their time waiting on user input or network responses, so algorithmic
+complexity rarely surfaces. A real-time simulation is compute bound, which makes
+it one of the few contexts where data structure choice is immediately visible.
+The naive $`O(N^2)`$ collision check and the $`O(N)`$ spatial grid produce
+observably different frame rates at realistic particle counts.
 
 Execution model also matters at scale. JavaScript's JIT compiler must guard
 against type changes at runtime and can deoptimize; WASM's static types are
