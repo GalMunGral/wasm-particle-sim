@@ -7,10 +7,10 @@
 ### Purpose
 
 Most interactive programs process a fixed, small amount of data per user action,
-so algorithmic complexity and execution model rarely matter — the input is
-bounded regardless of $`N`$. A real-time particle simulation is one of the few
-contexts where $`N`$ is something you can actually turn up, and both factors
-become visible at once.
+so algorithmic complexity and runtime rarely matter — the input is bounded
+regardless of $`N`$. A real-time particle simulation is one of the few contexts
+where $`N`$ is something you can actually turn up, and both factors become
+visible at once.
 
 **Data structure:** the naive $`O(N^2)`$ collision check and the $`O(N)`$ spatial
 grid produce observably different frame rates once $`N`$ is large enough.
@@ -25,7 +25,15 @@ and WebGL for rendering rather than staying in JavaScript.
 real-time slider and displays the frame rate continuously. The purpose is to let
 the viewer push $`N`$ high enough to observe the difference between $`O(N^2)`$
 and $`O(N)`$ directly. A toggle switches between the two collision detection code
-paths. 
+paths.
+
+**A stepping stone.** Everything here — simulation, rendering, and UI — is
+written in Rust and compiled to WASM. This works, but WebGL calls and DOM
+manipulation in Rust are verbose and awkward. The lesson informed
+[wasm-fvm-cfd](https://github.com/GalMunGral/wasm-fvm-cfd), which draws a
+cleaner boundary: the solver in WASM, everything that touches the browser in
+TypeScript.
+
 ## Technical Challenges
 
 ### 1. Collision detection
@@ -44,15 +52,3 @@ The grid cell size is set to $`2 \times r_{\max}`$, so any two overlapping
 particles are guaranteed to be in the same or adjacent cells. Each particle
 checks at most $`3^3 = 27`$ cells; with uniform distribution each cell holds
 $`O(1)`$ particles on average, giving $`O(N)`$ total.
-
-### 2. Architecture
-
-The simulation, rendering, and UI are all written in Rust and compiled to WASM
-via `wasm-bindgen`. This is functional, but WebGL calls and DOM manipulation in
-Rust are verbose — the language is well-suited to the simulation logic, but adds
-unnecessary friction everywhere else.
-
-The [wasm-fvm-cfd](https://github.com/GalMunGral/wasm-fvm-cfd) project
-establishes a cleaner boundary: the numerical solver runs in WASM, while
-everything that touches the browser — rendering, controls, animation loop — is
-written in TypeScript. The two layers communicate through a thin exported API.
