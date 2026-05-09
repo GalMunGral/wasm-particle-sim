@@ -6,15 +6,16 @@
 
 ### Purpose
 
-For an audience familiar with particle simulations or physics engines, we want
-to communicate two things. First, that the choice of data structure is not a
-matter of theory — it is what determines whether a simulation can be interactive
-at all. Naively checking every pair of particles for collision is $`O(N^2)`$; a
-uniform spatial grid reduces this to $`O(N)`$.
+This project demonstrates two points. Data structure choice is what makes a
+simulation interactive or not — the naive $`O(N^2)`$ collision check and the
+$`O(N)`$ spatial grid are not just asymptotically different, they produce
+different outcomes at realistic particle counts.
 
-Second, that Rust compiled to WebAssembly is substantially faster than an
-equivalent JavaScript implementation for this kind of workload — fast enough to
-change what particle counts are feasible in a browser.
+Execution model also matters at scale. JavaScript's JIT compiler must guard
+against type changes at runtime and can deoptimize; WASM's static types are
+resolved at compile time, producing tight machine code without runtime checks.
+On top of that, GC pauses in JavaScript are unpredictable in a way that is
+particularly disruptive for a simulation that needs to hit 60fps consistently.
 
 ### Strategy
 
@@ -22,9 +23,7 @@ change what particle counts are feasible in a browser.
 real-time slider and displays the frame rate continuously. The purpose is to let
 the viewer push $`N`$ high enough to observe the difference between $`O(N^2)`$
 and $`O(N)`$ directly. A toggle switches between the two collision detection code
-paths. The brute-force implementation remains in `simulation.rs` for direct
-comparison.
-
+paths. 
 ## Technical Challenges
 
 ### 1. Collision detection
