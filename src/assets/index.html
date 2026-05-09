@@ -2,35 +2,55 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>WebAssembly + WebGL</title>
+    <title>Particle Effects</title>
     <style>
-      body {
-        margin: 0;
-        border: none;
-        padding: 0;
-        position: fixed;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-      }
-      #control {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
+      * {
         box-sizing: border-box;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-      }
-      #display {
         margin: 0;
         padding: 0;
-        border: 0;
+      }
+
+      body {
+        position: fixed;
+        inset: 0;
+        background: #111;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        color: #e0e0e0;
+      }
+
+      #display {
         width: 100%;
         height: 100%;
+        display: block;
+      }
+
+      #control {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 12px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 220px;
+      }
+
+      #control input[type="range"] {
+        width: 100%;
+        accent-color: #60a5fa;
+        cursor: pointer;
+      }
+
+      #stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #aaa;
+        letter-spacing: 0.02em;
       }
     </style>
   </head>
@@ -39,8 +59,10 @@
     <canvas id="display"></canvas>
     <div id="control">
       <input type="range" value="50" min="50" max="40000" step="1" />
-      <div id="count"></div>
-      <div id="fps"></div>
+      <div id="stats">
+        <span id="count"></span>
+        <span id="fps"></span>
+      </div>
     </div>
     <script type="module">
       import wasm from "./particle_simulation.js";
