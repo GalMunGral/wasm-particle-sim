@@ -15,7 +15,7 @@ become visible at once.
 Data structure: the naive $`O(N^2)`$ collision check and the $`O(N)`$ spatial
 grid produce observably different frame rates once $`N`$ is large enough.
 
-Execution model: at that scale, JavaScript's runtime type guards and GC pauses
+Runtime: at that scale, JavaScript's runtime type guards and GC pauses
 become a bottleneck too — which is why this project uses WASM for the simulation
 and WebGL for rendering rather than staying in JavaScript.
 
