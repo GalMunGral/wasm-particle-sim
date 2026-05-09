@@ -1,6 +1,6 @@
-# particle-effects
+# Particle Simulation
 
-**Live demo:** https://galmungral.github.io/particle-effects/
+**Live demo:** https://galmungral.github.io/wasm-particle-sim/
 
 ## Rhetorical Design
 
