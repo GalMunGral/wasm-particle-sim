@@ -1,6 +1,6 @@
 # Particle Simulation
 
-**Live demo:** https://galmungral.github.io/wasm-particle-sim/
+**Live demo:** https://hwenchi.github.io/wasm-particle-sim/
 
 ## Rhetorical Design
 
@@ -30,7 +30,7 @@ paths.
 **A stepping stone.** Everything here — simulation, rendering, and UI — is
 written in Rust and compiled to WASM. This works, but WebGL calls and DOM
 manipulation in Rust are verbose and awkward. The lesson informed
-[wasm-fvm-cfd](https://github.com/GalMunGral/wasm-fvm-cfd), which draws a
+[wasm-fvm-cfd](https://github.com/hwenchi/wasm-fvm-cfd), which draws a
 cleaner boundary: the solver in WASM, everything that touches the browser in
 TypeScript.
 
